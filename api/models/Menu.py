@@ -1,14 +1,18 @@
+from ctypes.wintypes import BOOLEAN
+
 from sqlalchemy import Column, ForeignKey, Integer, String, DECIMAL, DATETIME
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..dependencies.database import Base
 
-class Feedback(Base):
-    __tablename__ = 'feedback'
+class Menu(Base):
+    __tablename__ = 'menu'
     id = Column(Integer, primary_key=True)
-    menu_id = Column(Integer, ForeignKey('menu.id'))
-    guest_id = Column(Integer, ForeignKey('customer.id'))
-    order_id = Column(Integer, ForeignKey('order.id'))
+    item = Column(String)
+    ingredients = Column("inventory.item_name", String)
+    standard_price = Column(DECIMAL)
+    availability = Column(BOOLEAN)
     rating = Column(DECIMAL)
-    comment = Column(String)
+
+
 

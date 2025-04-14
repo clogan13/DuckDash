@@ -3,11 +3,9 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..dependencies.database import Base
 
-class customer(Base):
-    __tablename__ = 'customer'
+class Inventory(Base):
+    __tablename__ = 'inventory'
     id = Column(Integer, primary_key=True)
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50))
-    email = Column(String(50))
-    phone = Column(String(50))
-
+    item_name = Column(String)
+    quantity = Column(DECIMAL)
+    price = Column(DECIMAL)
