@@ -11,5 +11,3 @@ class Payment(Base):
     payment_status = Column(String)
     payment_date = Column(DATETIME)
     payment_amount = Column(DECIMAL) # combination of menu price, addons, and promotions
-
-

@@ -1,11 +1,14 @@
-from . import Orders, order_details, recipes, sandwiches, resources
+from . import Customer, Feedback, Orders, Promotion, Payment
+from .Payment import Payment
 
 from ..dependencies.database import engine
 
 
 def index():
-    orders.Base.metadata.create_all(engine)
-    order_details.Base.metadata.create_all(engine)
-    recipes.Base.metadata.create_all(engine)
-    sandwiches.Base.metadata.create_all(engine)
-    resources.Base.metadata.create_all(engine)
+
+    Customer.Base.metadata.create_all(engine)
+    Feedback.Base.metadata.create_all(engine)
+    Orders.Base.metadata.create_all(engine)
+    Payment.Base.metadata.create_all(engine)
+    Promotion.Base.metadata.create_all(engine)
+
