@@ -10,9 +10,8 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    guest_id = Column("customer.firstname", "customer.lastname")
+    guest_id = Column(Integer, ForeignKey("guests.id"))
+    guest_name= Column("customer.first_name" + "customer.last_name")
     order_date = Column(DATETIME, nullable=False, server_default=str(datetime.now()))
-    total = Column("total", "payment.payment_amount")
+    total = Column( "payment.payment_amount")
     status = Column(String, nullable=False, server_default="Preparing")
-
-    order_details = relationship("OrderDetail", back_populates="order")

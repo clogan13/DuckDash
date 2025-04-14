@@ -13,6 +13,8 @@ class Menu(Base):
     standard_price = Column(DECIMAL)
     availability = Column(BOOLEAN)
     rating = Column(DECIMAL)
+    description = Column(String)
+
 
 
 

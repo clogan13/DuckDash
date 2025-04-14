@@ -7,7 +7,7 @@ from ..dependencies.database import Base
 class promotion(Base):
     __tablename__ = 'promotion'
     id = Column(Integer, primary_key=True)
-    desc = Column(String)
+    description = Column(String)
     discount = Column(DECIMAL)
     start_date = Column(DATETIME)
     end_date = Column(DATETIME)
