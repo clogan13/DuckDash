@@ -1,3 +1,5 @@
+from itertools import combinations
+
 from sqlalchemy import Column, ForeignKey, Integer, String, DECIMAL, DATETIME
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -8,8 +10,9 @@ class Order(Base):
     __tablename__ = "orders"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    customer_name = Column(String(100))
+    guest_id = Column("customer.firstname", "customer.lastname")
     order_date = Column(DATETIME, nullable=False, server_default=str(datetime.now()))
-    description = Column(String(300))
+    total = Column("total", "payment.payment_amount")
+    status = Column(String, nullable=False, server_default="Preparing")
 
     order_details = relationship("OrderDetail", back_populates="order")
