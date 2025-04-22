@@ -18,3 +18,9 @@ class updateMenuItem(BaseModel):
     price: Optional[float] = None
     ingredients: Optional[list[str]] = None
     availability: Optional[bool] = None
+
+class Menu(MenuItem):
+    id: int
+
+    class Config:
+        form_attributes = True
