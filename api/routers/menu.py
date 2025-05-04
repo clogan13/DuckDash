@@ -4,7 +4,6 @@ from ..dependencies.database import get_db
 from ..schemas.Menu import MenuCreate, MenuUpdate, Menu
 from ..controllers import Menu as controller
 from typing import List
-from ..dependencies.auth import get_current_user
 
 # This router handles all menu item-related API endpoints
 router = APIRouter(
@@ -14,7 +13,7 @@ router = APIRouter(
 
 # Endpoint to create a new menu item
 @router.post("/", response_model=Menu)
-def create_menu(request: MenuCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_menu(request: MenuCreate, db: Session = Depends(get_db)):
     """Create a new menu item and return it with its ID."""
     return controller.create(db=db, request=request)
 
@@ -39,13 +38,13 @@ def get_menu(menu_id: int, db: Session = Depends(get_db)):
 
 # Endpoint to update a menu item by its ID
 @router.put("/{menu_id}", response_model=Menu)
-def update_menu(menu_id: int, request: MenuUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def update_menu(menu_id: int, request: MenuUpdate, db: Session = Depends(get_db)):
     """Update a menu item's details by its ID."""
     return controller.update(db, menu_id, request)
 
 # Endpoint to delete a menu item by its ID
 @router.delete("/{menu_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_menu(menu_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_menu(menu_id: int, db: Session = Depends(get_db)):
     """Delete a menu item by its unique ID."""
     controller.delete(db, menu_id)
     return None 

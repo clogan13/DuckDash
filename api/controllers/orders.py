@@ -32,7 +32,8 @@ def create(db: Session, request: OrderCreate):
             last_name=request.last_name or "",
             phone=request.phone,
             email=request.email,
-            address=request.address
+            address=request.address,
+            created_at=datetime.utcnow()
         )
         db.add(guest)
         db.commit()
@@ -41,75 +42,76 @@ def create(db: Session, request: OrderCreate):
     else:
         customer_id = request.customer_id
 
+    # Calculate total amount and validate menu items
     total_amount = 0
     order_items = []
-    ingredient_deductions = {}  # {ingredient_id: total_to_deduct}
+    ingredient_deductions = {}
+
     for detail in request.order_details:
         menu_item = db.query(Menu).filter(Menu.id == detail.menu_item_id).first()
         if not menu_item:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Menu item {detail.menu_item_id} not found!")
-        item_price = menu_item.price * detail.quantity
-        total_amount += item_price
-        order_items.append(model.OrderItem(
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Menu item {detail.menu_item_id} not found"
+            )
+        
+        # Calculate item total
+        item_total = float(menu_item.price) * detail.quantity
+        total_amount += item_total
+
+        # Create order item
+        order_item = model.OrderItem(
             menu_item_id=detail.menu_item_id,
             quantity=detail.quantity,
             item_price=menu_item.price
-        ))
-        # Inventory deduction logic (fixed)
-        ingredient_rows = db.execute(
-            menu_item_ingredient.select().where(
-                menu_item_ingredient.c.menu_item_id == detail.menu_item_id
-            )
-        ).fetchall()
-        for row in ingredient_rows:
-            ingredient_id = row.ingredient_id
-            required_qty = row.quantity
-            total_required = required_qty * detail.quantity
-            ingredient_deductions[ingredient_id] = ingredient_deductions.get(ingredient_id, 0) + total_required
-    # Check and deduct inventory
-    try:
-        for ingredient_id, total_to_deduct in ingredient_deductions.items():
-            inventory = db.query(Inventory).filter(Inventory.ingredient_id == ingredient_id).with_for_update().first()
-            if not inventory or inventory.quantity < total_to_deduct:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Insufficient inventory for ingredient {ingredient_id}")
-            inventory.quantity -= total_to_deduct
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise
-    # Promotion code logic
+        )
+        order_items.append(order_item)
+
+        # Track ingredient deductions
+        for ingredient in menu_item.ingredients:
+            if ingredient.id not in ingredient_deductions:
+                ingredient_deductions[ingredient.id] = 0
+            ingredient_deductions[ingredient.id] += float(ingredient.quantity) * detail.quantity
+
+    # Apply promotion if provided
+    discount_amount = 0
     if request.promotion_code:
         promo = db.query(Promotion).filter(
             func.lower(Promotion.code) == request.promotion_code.lower()
         ).first()
         now = datetime.utcnow().date()
+        
         if not promo:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid promotion code.")
         if promo.start_date > now or promo.end_date < now:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Promotion code is not active.")
         if promo.usage_limit is not None and promo.usage_limit <= 0:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Promotion code usage limit reached.")
+        
         # Apply discount
         if promo.discount_percent:
-            discount = float(total_amount) * float(promo.discount_percent) / 100.0
+            discount_amount = float(total_amount) * float(promo.discount_percent) / 100.0
         elif promo.discount_amount:
-            discount = float(promo.discount_amount)
-        else:
-            discount = 0.0
-        total_amount = max(0, float(total_amount) - discount)
-        # Optionally decrement usage_limit
+            discount_amount = float(promo.discount_amount)
+        
+        total_amount = max(0, float(total_amount) - discount_amount)
+        
+        # Decrement usage_limit if applicable
         if promo.usage_limit is not None:
             promo.usage_limit -= 1
-            db.commit()
+
+    # Create the order
     new_order = model.Order(
         customer_id=customer_id,
         tracking_number=request.tracking_number,
         status=request.status,
-        order_time=datetime.utcnow(),
-        wait_time_minutes=request.wait_time_minutes,
         total_amount=total_amount,
+        wait_time_minutes=request.wait_time_minutes,
+        promotion_code=request.promotion_code,
+        discount_amount=discount_amount,
         items=order_items
     )
+
     try:
         db.add(new_order)
         db.commit()
@@ -125,8 +127,10 @@ def create(db: Session, request: OrderCreate):
         db.add(history_entry)
         db.commit()
     except SQLAlchemyError as e:
+        db.rollback()
         error = str(e.__dict__['orig'])
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+
     return new_order
 
 # Controller function to get all orders from the database

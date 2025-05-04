@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from .order_details import OrderDetail, OrderDetailCreate
 from ..models.Orders import OrderStatus
+import uuid
 
 # Base schema for order data
 class OrderBase(BaseModel):
@@ -16,7 +17,7 @@ class OrderCreate(OrderBase):
     phone: Optional[str] = None       # Guest phone
     email: Optional[str] = None       # Guest email
     address: Optional[str] = None     # Guest address
-    tracking_number: str  # Unique tracking number for the order
+    tracking_number: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()))  # Auto-generated if not provided
     status: OrderStatus = OrderStatus.pending  # Order status, defaults to pending
     wait_time_minutes: Optional[int] = None  # Estimated wait time in minutes
     order_details: List[OrderDetailCreate]  # List of items in the order
@@ -44,14 +45,17 @@ class OrderStatusHistory(BaseModel):
 # Schema for returning an order from the API, includes related details
 class Order(OrderBase):
     id: int  # Unique order ID
-    order_time: Optional[datetime] = None
-    items: Optional[List[OrderDetail]] = None
-    status_history: Optional[List[OrderStatusHistory]] = None
     customer_id: int
     tracking_number: str
     status: OrderStatus
     total_amount: float
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    promotion_code: Optional[str] = None
+    discount_amount: Optional[float] = 0
     wait_time_minutes: Optional[int] = None
+    items: Optional[List[OrderDetail]] = None
+    status_history: Optional[List[OrderStatusHistory]] = None
 
     class Config:
         from_attributes = True
