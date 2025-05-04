@@ -106,6 +106,35 @@ The system handles various error cases:
 - Usage limit exceeded
 - Invalid discount values
 - Date range conflicts
+- **Duplicate promotion codes** (UNIQUE constraint violation)
+
+### Unique Constraint on Promotion Codes
+The promotion system enforces uniqueness on promotion codes to prevent confusion and maintain data integrity:
+
+```sql
+CREATE TABLE promotions (
+    ...
+    code VARCHAR(50) UNIQUE NOT NULL,
+    ...
+);
+```
+
+#### Handling Duplicate Codes
+When attempting to create a promotion with a code that already exists, the system will return a 500 Internal Server Error with the following message:
+```
+sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1062, "Duplicate entry 'CODE' for key 'promotion.code'")
+```
+
+To resolve this, you can:
+1. Use a different promotion code
+2. Delete the existing promotion first
+3. Update the existing promotion instead of creating a new one
+
+#### Best Practices for Promotion Codes
+1. Use descriptive but unique codes (e.g., 'SUMMER2024' instead of 'SUMMER')
+2. Include version numbers if reusing similar codes (e.g., 'FIVEOFF2')
+3. Consider using a prefix system (e.g., 'DD-SUMMER-2024')
+4. Document all active promotion codes to avoid conflicts
 
 ## Implementation Details
 
