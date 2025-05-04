@@ -4,6 +4,9 @@ from ..dependencies.database import get_db
 from ..schemas.customers import CustomerCreate, CustomerUpdate, Customer
 from ..controllers import Customer as controller
 from typing import List
+from ..dependencies.auth import get_current_user
+from ..models.user import User
+from ..models.Customer import Customer as CustomerModel
 
 # This router handles all customer-related API endpoints
 router = APIRouter(
@@ -38,4 +41,25 @@ def update_customer(customer_id: int, request: CustomerUpdate, db: Session = Dep
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     """Delete a customer by their unique ID."""
     controller.delete(db, customer_id)
-    return None 
+    return None
+
+@router.get("/me", response_model=Customer)
+def get_my_profile(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Get the current user's customer profile."""
+    customer = db.query(CustomerModel).filter(CustomerModel.user_id == user.id).first()
+    if not customer:
+        return None
+    return customer
+
+@router.put("/me", response_model=Customer)
+def update_my_profile(request: CustomerUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Update the current user's customer profile."""
+    customer = db.query(CustomerModel).filter(CustomerModel.user_id == user.id).first()
+    if not customer:
+        return None
+    update_data = request.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(customer, key, value)
+    db.commit()
+    db.refresh(customer)
+    return customer 

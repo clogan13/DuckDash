@@ -17,8 +17,9 @@
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="menu.html">Menu</a></li>
-          <li><a href="contact.html">Contact Us</a></li>
-          <li><a href="login.html" class="login-btn">Login</a></li>
+          <li><a href="profile.html" id="profile-nav-item" style="display:none;">Profile</a></li>
+          <li id="login-nav-item"><a href="login.html" class="login-btn">Login</a></li>
+          <li id="logout-nav-item" style="display: none;"><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
         </ul>
       </nav>
     </header>
@@ -54,6 +55,28 @@
     <!-- JS to Fetch Menu from API -->
     <script>
       let cart = [];
+      let currentUser = null;
+
+      // Check if user is logged in
+      function checkLoginStatus() {
+        const token = localStorage.getItem('token');
+        if (token) {
+          document.getElementById('login-nav-item').style.display = 'none';
+          document.getElementById('logout-nav-item').style.display = 'block';
+          document.getElementById('profile-nav-item').style.display = 'block';
+        } else {
+          document.getElementById('login-nav-item').style.display = 'block';
+          document.getElementById('logout-nav-item').style.display = 'none';
+          document.getElementById('profile-nav-item').style.display = 'none';
+        }
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('cart');
+        window.location.href = 'index.html';
+      }
 
       async function loadMenu() {
         try {
@@ -167,17 +190,63 @@
         });
       }
 
-      function goToCheckout() {
+      async function goToCheckout() {
         if (cart.length === 0) {
           alert('Your cart is empty!');
           return;
         }
+
+        // If user is logged in, create the order first
+        let orderId = null;
+        if (currentUser) {
+          try {
+            const orderData = {
+              customer_id: currentUser.id,
+              order_details: cart.map(item => ({
+                menu_item_id: item.id,
+                quantity: item.quantity
+              }))
+            };
+
+            const response = await fetch('http://localhost:8000/orders/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to create order');
+            }
+
+            const order = await response.json();
+            // Store the order ID for the checkout page
+            orderId = order.id;
+            localStorage.setItem('currentOrderId', order.id);
+          } catch (error) {
+            console.error('Error creating order:', error);
+            alert('Failed to create order. Please try again.');
+            return;
+          }
+        }
+
         // Store cart in localStorage for checkout page
         localStorage.setItem('cart', JSON.stringify(cart));
-        window.location.href = 'checkout.html';
+        // Redirect to checkout with order_id in URL if available
+        if (orderId) {
+          window.location.href = `checkout.html?order_id=${orderId}`;
+        } else {
+          window.location.href = 'checkout.html';
+        }
       }
 
-      loadMenu();
+      // Initialize the page after DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        checkLoginStatus();
+        loadMenu();
+      });
     </script>
   </body>
 </html>

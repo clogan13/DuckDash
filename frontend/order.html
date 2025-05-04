@@ -128,8 +128,9 @@
       <ul class="nav-links">
         <li><a href="/static/index.html">Home</a></li>
         <li><a href="/static/menu.html">Menu</a></li>
-        <li><a href="/static/order.html">Order</a></li>
-        <li><a href="/static/login.html" class="login-btn">Login</a></li>
+        <li><a href="/static/profile.html" id="profile-nav-item" style="display:none;">Profile</a></li>
+        <li id="login-nav-item"><a href="/static/login.html" class="login-btn">Login</a></li>
+        <li id="logout-nav-item" style="display: none;"><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -307,6 +308,28 @@
       table.style.display = "table";
     }
     loadOrderHistory();
+
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        document.getElementById('login-nav-item').style.display = 'none';
+        document.getElementById('logout-nav-item').style.display = 'block';
+        document.getElementById('profile-nav-item').style.display = 'block';
+      } else {
+        document.getElementById('login-nav-item').style.display = 'block';
+        document.getElementById('logout-nav-item').style.display = 'none';
+        document.getElementById('profile-nav-item').style.display = 'none';
+      }
+    }
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('cart');
+      window.location.href = 'index.html';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+      // ... existing code ...
+    });
   </script>
 </body>
 </html> 

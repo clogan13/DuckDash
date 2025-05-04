@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <title>DuckDash - Profile</title>
+  <style>
+    .profile-container {
+      max-width: 500px;
+      margin: 3rem auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(30,144,255,0.07);
+      padding: 2.5rem 2rem;
+    }
+    .profile-container h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1a73e8;
+    }
+    .profile-form label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+    }
+    .profile-form input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .profile-form button {
+      width: 100%;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .profile-form button:hover {
+      background: #1557b0;
+    }
+    .profile-success {
+      color: green;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .profile-error {
+      color: red;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="/static/img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+      <h1 class="brand">DuckDash</h1>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="profile.html" id="profile-nav-item" style="display:none;">Profile</a></li>
+        <li id="login-nav-item"><a href="login.html" class="login-btn">Login</a></li>
+        <li id="logout-nav-item" style="display: none;"><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="profile-container">
+    <h1>Your Profile</h1>
+    <div id="profile-message"></div>
+    <form id="profile-form" class="profile-form">
+      <label for="first_name">First Name</label>
+      <input type="text" id="first_name" name="first_name" required />
+      <label for="last_name">Last Name</label>
+      <input type="text" id="last_name" name="last_name" required />
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required />
+      <label for="phone">Phone</label>
+      <input type="text" id="phone" name="phone" />
+      <label for="address">Address</label>
+      <input type="text" id="address" name="address" />
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+  <footer>
+    <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+    </ul>
+  </footer>
+  <script>
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        document.getElementById('login-nav-item').style.display = 'none';
+        document.getElementById('logout-nav-item').style.display = 'block';
+        document.getElementById('profile-nav-item').style.display = 'block';
+      } else {
+        document.getElementById('login-nav-item').style.display = 'block';
+        document.getElementById('logout-nav-item').style.display = 'none';
+        document.getElementById('profile-nav-item').style.display = 'none';
+        window.location.href = 'login.html';
+      }
+    }
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('cart');
+      window.location.href = 'index.html';
+    }
+    async function loadProfile() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await fetch('http://localhost:8000/customers/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        const data = await res.json();
+        document.getElementById('first_name').value = data.first_name || '';
+        document.getElementById('last_name').value = data.last_name || '';
+        document.getElementById('email').value = data.email || '';
+        document.getElementById('phone').value = data.phone || '';
+        document.getElementById('address').value = data.address || '';
+      } catch (err) {
+        document.getElementById('profile-message').innerHTML = `<div class='profile-error'>${err.message}</div>`;
+      }
+    }
+    document.getElementById('profile-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const payload = {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value
+      };
+      try {
+        const res = await fetch('http://localhost:8000/customers/me', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Failed to update profile');
+        document.getElementById('profile-message').innerHTML = `<div class='profile-success'>Profile updated successfully!</div>`;
+      } catch (err) {
+        document.getElementById('profile-message').innerHTML = `<div class='profile-error'>${err.message}</div>`;
+      }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+      loadProfile();
+    });
+  </script>
+</body>
+</html> 

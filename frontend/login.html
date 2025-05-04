@@ -60,7 +60,7 @@
         });
         if (response.ok) {
           const result = await response.json();
-          localStorage.setItem("duckdash_token", result.access_token);
+          localStorage.setItem("token", result.access_token);
           alert("Login successful!");
           window.location.href = "/static/index.html";
         } else {
