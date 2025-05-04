@@ -34,4 +34,4 @@ def root():
     """
     return {"message": "Welcome to DuckDash API"}
 
-model_loader.index()
+# model_loader.index()  # Disabled to prevent data loss on server restart

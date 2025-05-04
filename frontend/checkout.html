@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <title>DuckDash - Order Tracking</title>
+  <style>
+    .checkout-container {
+      max-width: 600px;
+      margin: 3rem auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(30,144,255,0.07);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .order-status {
+      font-size: 1.2rem;
+      margin: 1.5rem 0;
+      color: #0077ff;
+    }
+    .order-summary {
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    .order-summary ul {
+      list-style: none;
+      padding: 0;
+    }
+    .order-summary li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .order-summary .total {
+      font-weight: bold;
+      text-align: right;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="/static/img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+      <h1 class="brand">DuckDash</h1>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/static/index.html">Home</a></li>
+        <li><a href="/static/menu.html">Menu</a></li>
+        <li><a href="/static/order.html">Order</a></li>
+        <li><a href="/static/login.html" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div class="checkout-container">
+    <h1>Order Tracking</h1>
+    <div id="order-info"></div>
+    <div class="order-status" id="order-status">Loading order status...</div>
+    <div class="order-summary" id="order-summary"></div>
+  </div>
+  <footer>
+    <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="/static/index.html">Home</a></li>
+      <li><a href="/static/menu.html">Menu</a></li>
+      <li><a href="/static/contact.html">Contact Us</a></li>
+    </ul>
+  </footer>
+  <script>
+    function getOrderId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('order_id');
+    }
+    const orderId = getOrderId();
+    if (!orderId) {
+      document.getElementById('order-info').innerHTML = '<span style="color:red">No order ID found.</span>';
+      document.getElementById('order-status').style.display = 'none';
+      document.getElementById('order-summary').style.display = 'none';
+    } else {
+      document.getElementById('order-info').innerHTML = `Order ID: <b>${orderId}</b>`;
+      pollOrderStatus(orderId);
+    }
+
+    async function pollOrderStatus(orderId) {
+      const token = localStorage.getItem("duckdash_token");
+      const headers = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      let tries = 0;
+      async function fetchStatus() {
+        tries++;
+        const res = await fetch(`http://127.0.0.1:8000/orders/${orderId}`, { headers });
+        if (!res.ok) {
+          document.getElementById('order-status').innerHTML = '<span style="color:red">Order not found.</span>';
+          return;
+        }
+        const order = await res.json();
+        document.getElementById('order-status').innerHTML = `Status: <b>${order.status || 'Pending'}</b>` + (order.estimated_time ? `<br>Estimated time: <b>${order.estimated_time} min</b>` : '');
+        renderOrderSummary(order.items || []);
+        // Poll every 5 seconds, stop after 20 tries (100 seconds)
+        if (order.status && order.status.toLowerCase() === 'ready' || tries > 20) return;
+        setTimeout(fetchStatus, 5000);
+      }
+      fetchStatus();
+    }
+
+    function renderOrderSummary(items) {
+      if (!items.length) {
+        document.getElementById('order-summary').innerHTML = '';
+        return;
+      }
+      let total = 0;
+      const html = `<h2>Order Summary</h2><ul>${items.map(item => {
+        total += (item.price || 0) * (item.quantity || 1);
+        return `<li>${item.name || item.menu_item_name} x${item.quantity} <span>$${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span></li>`;
+      }).join('')}</ul><div class="total">Total: $${total.toFixed(2)}</div>`;
+      document.getElementById('order-summary').innerHTML = html;
+    }
+  </script>
+</body>
+</html> 

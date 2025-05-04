@@ -5,6 +5,118 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/static/style.css" />
   <title>DuckDash - Place Order</title>
+  <style>
+    .menu-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .menu-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(30,144,255,0.07);
+      padding: 1.5rem 2rem;
+      min-width: 220px;
+      max-width: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .menu-card:hover {
+      box-shadow: 0 8px 32px rgba(30,144,255,0.15);
+    }
+    .menu-card h3 {
+      margin-bottom: 0.5rem;
+      color: var(--primary-blue);
+    }
+    .menu-card p {
+      color: #555;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .menu-card .price {
+      font-weight: bold;
+      color: #0077ff;
+      margin-bottom: 0.5rem;
+    }
+    .menu-card input[type="number"] {
+      width: 60px;
+      margin-left: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .cart-summary {
+      background: #e6f2ff;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin: 2rem auto 1rem auto;
+      max-width: 500px;
+      box-shadow: 0 2px 8px rgba(30,144,255,0.07);
+    }
+    .cart-summary h2 {
+      color: var(--primary-blue);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .cart-summary ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+    .cart-summary li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .order-history-table {
+      width: 100%;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(30,144,255,0.07);
+      border-collapse: collapse;
+    }
+    .order-history-table th, .order-history-table td {
+      padding: 0.75rem 1rem;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    .order-history-table th {
+      background: #e6f2ff;
+      color: #033e8c;
+    }
+    .order-history-table td {
+      color: #222;
+    }
+    .order-success {
+      text-align: center;
+      color: #1a7f37;
+      font-size: 1.3rem;
+      margin-top: 2rem;
+    }
+    .order-success .checkmark {
+      font-size: 2.5rem;
+      color: #1e90ff;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .order-form-container {
+      max-width: 1100px;
+      width: 90%;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(30,144,255,0.07);
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -31,10 +143,28 @@
           <label for="guest-phone">Phone</label>
           <input type="tel" id="guest-phone" name="guest_phone" required />
         </div>
-        <div id="menu-items"></div>
+        <div id="menu-cards" class="menu-cards"></div>
+        <div class="cart-summary" id="cart-summary" style="display:none;"></div>
         <button type="submit">Submit Order</button>
       </form>
       <div id="order-confirmation" style="display:none;"></div>
+    </div>
+  </section>
+  <section>
+    <div id="order-history-section">
+      <h2 style="text-align:center; color:var(--primary-blue); margin-top:2rem;">Recent Orders</h2>
+      <table class="order-history-table" id="order-history-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Name</th>
+            <th>Items</th>
+            <th>Status</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="order-history-body"></tbody>
+      </table>
     </div>
   </section>
   <footer>
@@ -52,49 +182,82 @@
       document.getElementById("guest-fields").style.display = "none";
     }
 
-    // Load menu items
+    // --- Menu Cards and Cart ---
+    let menuItems = [];
+    let cart = [];
+
     async function loadMenu() {
       const res = await fetch("http://127.0.0.1:8000/menu/");
-      const menuItems = await res.json();
-      const menuDiv = document.getElementById("menu-items");
-      menuDiv.innerHTML = '<h2>Select Items</h2>';
+      menuItems = await res.json();
+      const menuDiv = document.getElementById("menu-cards");
+      menuDiv.innerHTML = '';
       menuItems.forEach(item => {
-        const div = document.createElement("div");
-        div.innerHTML = `
+        const card = document.createElement("div");
+        card.className = "menu-card";
+        card.innerHTML = `
+          <h3>${item.name}</h3>
+          <p>${item.description || ''}</p>
+          <div class="price">$${item.price.toFixed(2)}</div>
           <label>
-            <input type="checkbox" name="menu_item" value="${item.id}" data-name="${item.name}" data-price="${item.price}" />
-            ${item.name} ($${item.price.toFixed(2)})
+            <input type="checkbox" name="menu_item" value="${item.id}" />
+            Add to order
           </label>
-          <input type="number" min="1" value="1" style="width:50px; margin-left:10px;" disabled />
+          <input type="number" min="1" value="1" disabled />
         `;
-        const checkbox = div.querySelector('input[type="checkbox"]');
-        const qtyInput = div.querySelector('input[type="number"]');
+        const checkbox = card.querySelector('input[type="checkbox"]');
+        const qtyInput = card.querySelector('input[type="number"]');
         checkbox.addEventListener('change', function() {
           qtyInput.disabled = !this.checked;
+          updateCart();
         });
-        menuDiv.appendChild(div);
+        qtyInput.addEventListener('input', updateCart);
+        menuDiv.appendChild(card);
       });
     }
     loadMenu();
 
-    // Handle order submission
+    function updateCart() {
+      cart = [];
+      const selected = Array.from(document.querySelectorAll('input[name="menu_item"]:checked'));
+      selected.forEach(cb => {
+        const card = cb.closest('.menu-card');
+        const qty = parseInt(card.querySelector('input[type="number"]').value) || 1;
+        const item = menuItems.find(i => i.id == cb.value);
+        if (item) {
+          cart.push({ ...item, quantity: qty });
+        }
+      });
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartDiv = document.getElementById("cart-summary");
+      if (cart.length === 0) {
+        cartDiv.style.display = "none";
+        cartDiv.innerHTML = '';
+        return;
+      }
+      let total = 0;
+      cartDiv.innerHTML = `<h2>Your Order</h2><ul>${cart.map(item => {
+        total += item.price * item.quantity;
+        return `<li>${item.name} x${item.quantity} <span>$${(item.price * item.quantity).toFixed(2)}</span></li>`;
+      }).join('')}</ul><div style="font-weight:bold; text-align:right;">Total: $${total.toFixed(2)}</div>`;
+      cartDiv.style.display = "block";
+    }
+
+    // --- Order Submission ---
     document.getElementById("order-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const selected = Array.from(document.querySelectorAll('input[name="menu_item"]:checked'));
-      if (selected.length === 0) {
+      if (cart.length === 0) {
         alert("Please select at least one menu item.");
         return;
       }
-      const items = selected.map(cb => ({
-        menu_item_id: parseInt(cb.value),
-        quantity: parseInt(cb.parentElement.nextElementSibling.value)
-      }));
-      let orderData = { items };
+      const items = cart.map(item => ({ menu_item_id: item.id, quantity: item.quantity }));
+      let orderData = { order_details: items };
       if (!token) {
         orderData.guest_name = document.getElementById("guest-name").value;
         orderData.guest_phone = document.getElementById("guest-phone").value;
       }
-      // If logged in, attach token
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
       try {
@@ -105,9 +268,8 @@
         });
         if (response.ok) {
           const result = await response.json();
-          document.getElementById("order-form").style.display = "none";
-          document.getElementById("order-confirmation").style.display = "block";
-          document.getElementById("order-confirmation").innerHTML = `<h2>Order Placed!</h2><p>Your order ID: <b>${result.id || result.order_id}</b></p>`;
+          // Redirect to checkout page with order_id
+          window.location.href = `/static/checkout.html?order_id=${result.id || result.order_id}`;
         } else {
           const err = await response.json();
           alert("Order failed: " + (err.detail || "Unknown error"));
@@ -116,6 +278,35 @@
         alert("Error connecting to server.");
       }
     });
+
+    // --- Order History ---
+    async function loadOrderHistory() {
+      const headers = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch("http://127.0.0.1:8000/orders/", { headers });
+      if (!res.ok) return;
+      const orders = await res.json();
+      const table = document.getElementById("order-history-table");
+      const tbody = document.getElementById("order-history-body");
+      tbody.innerHTML = '';
+      if (orders.length === 0) {
+        table.style.display = "none";
+        return;
+      }
+      orders.forEach(order => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${order.id || order.order_id}</td>
+          <td>${order.guest_name || order.customer_name || '-'}</td>
+          <td>${order.items ? order.items.map(i => `${i.name || i.menu_item_name} x${i.quantity}`).join('<br>') : '-'}</td>
+          <td>${order.status || '-'}</td>
+          <td>${order.created_at ? new Date(order.created_at).toLocaleString() : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      table.style.display = "table";
+    }
+    loadOrderHistory();
   </script>
 </body>
 </html> 

@@ -31,6 +31,16 @@
       </div>
     </section>
 
+    <!-- Cart Section -->
+    <div class="cart-container">
+      <h2>Your Cart</h2>
+      <div id="cart-items"></div>
+      <div class="cart-total">
+        <span>Total: $</span><span id="cart-total">0.00</span>
+      </div>
+      <button id="checkout-btn" class="checkout-btn">Checkout</button>
+    </div>
+
     <!-- Footer -->
     <footer>
       <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
@@ -43,6 +53,8 @@
 
     <!-- JS to Fetch Menu from API -->
     <script>
+      let cart = [];
+
       async function loadMenu() {
         try {
           const res = await fetch("http://localhost:8000/menu/");
@@ -64,15 +76,105 @@
 
             grouped[category].forEach((item) => {
               const li = document.createElement("li");
-              li.innerHTML = `${item.name} <span>$${item.price.toFixed(2)}</span>`;
+              li.className = "menu-item";
+              li.innerHTML = `
+                <div class="item-info">
+                  <span class="item-name">${item.name}</span>
+                  <span class="item-price">$${item.price.toFixed(2)}</span>
+                </div>
+                <div class="item-controls">
+                  <input type="number" min="0" value="0" class="quantity-input" data-id="${item.id}">
+                  <button class="add-to-cart" data-id="${item.id}">Add to Cart</button>
+                </div>
+              `;
               section.querySelector("ul").appendChild(li);
             });
 
             grid.appendChild(section);
           }
+
+          // Add event listeners for add to cart buttons
+          document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+              const itemId = parseInt(this.dataset.id);
+              const quantity = parseInt(this.previousElementSibling.value);
+              if (quantity > 0) {
+                addToCart(itemId, quantity);
+              }
+            });
+          });
+
+          // Add event listener for checkout button
+          document.getElementById('checkout-btn').addEventListener('click', goToCheckout);
+
         } catch (err) {
           console.error("Failed to load menu:", err);
         }
+      }
+
+      function addToCart(itemId, quantity) {
+        // Find the item in the menu
+        const menuItem = document.querySelector(`.menu-item [data-id="${itemId}"]`).closest('.menu-item');
+        const itemName = menuItem.querySelector('.item-name').textContent;
+        const itemPrice = parseFloat(menuItem.querySelector('.item-price').textContent.replace('$', ''));
+
+        // Check if item is already in cart
+        const existingItem = cart.find(item => item.id === itemId);
+        if (existingItem) {
+          existingItem.quantity += quantity;
+        } else {
+          cart.push({
+            id: itemId,
+            name: itemName,
+            price: itemPrice,
+            quantity: quantity
+          });
+        }
+
+        updateCartDisplay();
+      }
+
+      function updateCartDisplay() {
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        let total = 0;
+
+        cartItems.innerHTML = '';
+        cart.forEach(item => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+          
+          const div = document.createElement('div');
+          div.className = 'cart-item';
+          div.innerHTML = `
+            <span class="cart-item-name">${item.name}</span>
+            <span class="cart-item-quantity">x${item.quantity}</span>
+            <span class="cart-item-price">$${itemTotal.toFixed(2)}</span>
+            <button class="remove-item" data-id="${item.id}">×</button>
+          `;
+          cartItems.appendChild(div);
+        });
+
+        cartTotal.textContent = total.toFixed(2);
+
+        // Add event listeners for remove buttons
+        document.querySelectorAll('.remove-item').forEach(button => {
+          button.addEventListener('click', function() {
+            const itemId = parseInt(this.dataset.id);
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartDisplay();
+          });
+        });
+      }
+
+      function goToCheckout() {
+        if (cart.length === 0) {
+          alert('Your cart is empty!');
+          return;
+        }
+        // Store cart in localStorage for checkout page
+        localStorage.setItem('cart', JSON.stringify(cart));
+        window.location.href = 'checkout.html';
       }
 
       loadMenu();
