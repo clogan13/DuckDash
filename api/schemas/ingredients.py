@@ -1,22 +1,34 @@
+"""
+Schemas for ingredient-related operations.
+"""
 from pydantic import BaseModel
 from typing import Optional
 
-# Base schema for ingredient data
 class IngredientBase(BaseModel):
+    """
+    Base schema for ingredient data.
+    """
     name: str
     unit: Optional[str] = None
 
-# Schema for creating a new ingredient
 class IngredientCreate(IngredientBase):
+    """
+    Schema for creating a new ingredient.
+    """
     pass
 
-# Schema for updating an ingredient
 class IngredientUpdate(BaseModel):
+    """
+    Schema for updating an existing ingredient.
+    """
     name: Optional[str] = None
     unit: Optional[str] = None
 
-# Schema for returning an ingredient from the API
 class Ingredient(IngredientBase):
+    """
+    Schema for ingredient response.
+    """
     id: int
+
     class Config:
-        orm_mode = True 
+        from_attributes = True 

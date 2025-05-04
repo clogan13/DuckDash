@@ -1,3 +1,6 @@
+-- Duckdash Database Schema (MySQL)
+-- Share this file with your group to ensure everyone has the same tables
+
 -- Create the database
 CREATE DATABASE IF NOT EXISTS `Duckdash`
   CHARACTER SET = utf8mb4
@@ -5,7 +8,7 @@ CREATE DATABASE IF NOT EXISTS `Duckdash`
 USE `Duckdash`;
 
 -- Customers (guests)
-CREATE TABLE `customer` (
+CREATE TABLE IF NOT EXISTS `customer` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `first_name` VARCHAR(100) NOT NULL,
   `last_name` VARCHAR(100) NOT NULL,
@@ -15,8 +18,17 @@ CREATE TABLE `customer` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- Users (for authentication)
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `is_active` BOOLEAN NOT NULL DEFAULT TRUE,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- Promotions
-CREATE TABLE `promotion` (
+CREATE TABLE IF NOT EXISTS `promotion` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `code` VARCHAR(50) UNIQUE NOT NULL,
   `discount_amount` DECIMAL(10,2) DEFAULT NULL,
@@ -27,7 +39,7 @@ CREATE TABLE `promotion` (
 ) ENGINE=InnoDB;
 
 -- Menu items
-CREATE TABLE `menu_item` (
+CREATE TABLE IF NOT EXISTS `menu_item` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(150) NOT NULL,
   `description` TEXT,
@@ -40,14 +52,14 @@ CREATE TABLE `menu_item` (
 ) ENGINE=InnoDB;
 
 -- Ingredients
-CREATE TABLE `ingredient` (
+CREATE TABLE IF NOT EXISTS `ingredient` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) NOT NULL,
   `unit` VARCHAR(50)
 ) ENGINE=InnoDB;
 
 -- Menu‐Item ⇄ Ingredient (many‐to‐many)
-CREATE TABLE `menu_item_ingredient` (
+CREATE TABLE IF NOT EXISTS `menu_item_ingredient` (
   `menu_item_id` INT NOT NULL,
   `ingredient_id` INT NOT NULL,
   `quantity` DECIMAL(10,2) NOT NULL,
@@ -59,7 +71,7 @@ CREATE TABLE `menu_item_ingredient` (
 ) ENGINE=InnoDB;
 
 -- Inventory (resources)
-CREATE TABLE `inventory` (
+CREATE TABLE IF NOT EXISTS `inventory` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `ingredient_id` INT NOT NULL,
   `quantity` DECIMAL(12,2) NOT NULL,
@@ -69,7 +81,7 @@ CREATE TABLE `inventory` (
 ) ENGINE=InnoDB;
 
 -- Orders
-CREATE TABLE `orders` (
+CREATE TABLE IF NOT EXISTS `orders` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `customer_id` INT NOT NULL,
   `tracking_number` VARCHAR(100) UNIQUE NOT NULL,
@@ -83,7 +95,7 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB;
 
 -- Order items
-CREATE TABLE `order_item` (
+CREATE TABLE IF NOT EXISTS `order_item` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `order_id` INT NOT NULL,
   `menu_item_id` INT NOT NULL,
@@ -96,7 +108,7 @@ CREATE TABLE `order_item` (
 ) ENGINE=InnoDB;
 
 -- Payments
-CREATE TABLE `payment` (
+CREATE TABLE IF NOT EXISTS `payment` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `order_id` INT NOT NULL,
   `amount` DECIMAL(10,2) NOT NULL,
@@ -109,7 +121,7 @@ CREATE TABLE `payment` (
 ) ENGINE=InnoDB;
 
 -- Feedback
-CREATE TABLE `feedback` (
+CREATE TABLE IF NOT EXISTS `feedback` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `order_id` INT NOT NULL,
   `customer_id` INT NOT NULL,
@@ -123,7 +135,7 @@ CREATE TABLE `feedback` (
 ) ENGINE=InnoDB;
 
 -- Staff users / roles
-CREATE TABLE `staff_user` (
+CREATE TABLE IF NOT EXISTS `staff_user` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `username` VARCHAR(50) UNIQUE NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,

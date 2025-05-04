@@ -4,6 +4,10 @@ from ..dependencies.database import get_db
 from ..schemas.Inventory import InventoryCreate, InventoryUpdate, Inventory
 from ..controllers import Inventory as controller
 from typing import List
+from ..models.Customer import Customer  # Import your Customer model
+from ..schemas.auth import UserCreate, UserResponse  # Import necessary schemas
+from ..dependencies.auth import get_password_hash  # Import necessary function
+from fastapi import HTTPException
 
 # This router handles all inventory-related API endpoints
 router = APIRouter(

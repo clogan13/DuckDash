@@ -1,19 +1,8 @@
-from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey
+from sqlalchemy import Column, Integer, DECIMAL, ForeignKey
 from sqlalchemy.orm import relationship
 from ..dependencies.database import Base
+from .ingredient import Ingredient
 from .Menu import menu_item_ingredient
-
-class Ingredient(Base):
-    __tablename__ = "ingredient"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False)
-    unit = Column(String(50))
-    menus = relationship(
-        "Menu",
-        secondary=menu_item_ingredient,
-        back_populates="ingredients"
-    )
-    inventory_items = relationship("Inventory", back_populates="ingredient")
 
 class Inventory(Base):
     __tablename__ = "inventory"

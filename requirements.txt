@@ -1,10 +1,27 @@
-fastapi
-uvicorn
-sqlalchemy
+# FastAPI web framework
+fastapi==0.104.1
+# ASGI server for FastAPI
+uvicorn==0.24.0
+# SQLAlchemy ORM for database models
+sqlalchemy>=2.0.40
+# MySQL database drivers
 pymysql
+mysql-connector-python
+# Environment variable support
+python-dotenv
+# JWT authentication
+python-jose[cryptography]
+# Pydantic for data validation (with email support)
+pydantic[email]
+email-validator
+# Password hashing
+passlib[bcrypt]
+# Multipart form support (for file uploads)
+python-multipart
+# HTTP client for testing
+httpx
+# Testing frameworks
 pytest
 pytest-mock
-httpx
+# Cryptography for secure operations
 cryptography
-mysql-connector-python
-python-dotenv
