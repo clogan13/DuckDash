@@ -23,8 +23,19 @@ def create(db: Session, request: MenuCreate):
     return new_item
 
 # Controller function to get all menu items
-def read_all(db: Session):
-    return db.query(Menu).all()
+def read_all(db: Session, category=None, dietary=None, min_price=None, max_price=None, name=None):
+    query = db.query(Menu)
+    if category:
+        query = query.filter(Menu.category == category)
+    if dietary:
+        query = query.filter(Menu.dietary == dietary)
+    if min_price is not None:
+        query = query.filter(Menu.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Menu.price <= max_price)
+    if name:
+        query = query.filter(Menu.name.ilike(f"%{name}%"))
+    return query.all()
 
 # Controller function to get a single menu item by ID
 def read_one(db: Session, menu_id: int):

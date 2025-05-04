@@ -99,4 +99,48 @@ def test_create_order_detail():
     data = response.json()
     assert data["order_id"] == order_id
     assert data["menu_item_id"] == menu_id
-    assert data["quantity"] == order_detail_data["quantity"] 
+    assert data["quantity"] == order_detail_data["quantity"]
+
+def test_menu_browsing_with_filters():
+    # Create several menu items
+    client.post("/menu/", json={
+        "name": "Vegan Salad",
+        "description": "Fresh vegan salad",
+        "price": 7.99,
+        "category": "Salads",
+        "dietary": "Vegan"
+    })
+    client.post("/menu/", json={
+        "name": "Gluten-Free Pizza",
+        "description": "Pizza with gluten-free crust",
+        "price": 12.99,
+        "category": "Pizza",
+        "dietary": "Gluten-Free"
+    })
+    client.post("/menu/", json={
+        "name": "Classic Burger",
+        "description": "Beef burger",
+        "price": 10.99,
+        "category": "Burgers",
+        "dietary": "None"
+    })
+    # Test filter by category
+    response = client.get("/menu/?category=Salads")
+    assert response.status_code == 200
+    assert any(item["name"] == "Vegan Salad" for item in response.json())
+    # Test filter by dietary
+    response = client.get("/menu/?dietary=Gluten-Free")
+    assert response.status_code == 200
+    assert any(item["name"] == "Gluten-Free Pizza" for item in response.json())
+    # Test filter by min_price
+    response = client.get("/menu/?min_price=11")
+    assert response.status_code == 200
+    assert all(item["price"] >= 11 for item in response.json())
+    # Test filter by max_price
+    response = client.get("/menu/?max_price=8")
+    assert response.status_code == 200
+    assert all(item["price"] <= 8 for item in response.json())
+    # Test filter by name search
+    response = client.get("/menu/?name=Pizza")
+    assert response.status_code == 200
+    assert any("Pizza" in item["name"] for item in response.json()) 
