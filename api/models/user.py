@@ -12,8 +12,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, nullable=False)  # Unique user ID
-    email = Column(String, nullable=False, unique=True)     # User's email address (used for login)
-    password = Column(String, nullable=False)               # Hashed password
-    is_active = Column(Boolean, server_default='TRUE', nullable=False)  # Whether the user is active
+    email = Column(String(255), nullable=False, unique=True)     # User's email address (used for login)
+    password = Column(String(255), nullable=False)               # Hashed password
+    is_active = Column(Boolean, server_default='1', nullable=False)  # Whether the user is active
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))  # Account creation timestamp 
-    status_changes = relationship("OrderStatusHistory", back_populates="staff_user") 
+    
+    # Relationships
+    status_changes = relationship("OrderStatusHistory", back_populates="staff_user")
+    customer = relationship("Customer", back_populates="user", uselist=False)  # One-to-one relationship with Customer 

@@ -5,6 +5,7 @@ from .Menu import Menu
 from .Orders import Order, OrderItem, OrderStatus
 from .Payment import Payment, PaymentMethod, PaymentStatus
 from .Promotion import Promotion
+from .user import User
 
 __all__ = [
     'Customer',
@@ -18,5 +19,6 @@ __all__ = [
     'Payment',
     'PaymentMethod',
     'PaymentStatus',
-    'Promotion'
+    'Promotion',
+    'User'
 ]

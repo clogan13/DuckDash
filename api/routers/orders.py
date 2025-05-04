@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..dependencies.database import get_db
-from ..dependencies.auth import get_current_user
 from ..controllers import orders as controller
 from ..schemas.orders import OrderCreate, OrderUpdate, OrderStatusHistory, Order
 from typing import List
@@ -43,15 +42,13 @@ def read_order(order_id: int, db: Session = Depends(get_db)):
 def update_order(
     order_id: int,
     request: OrderUpdate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Update an order's status and other details.
-    Requires authentication.
     Records status changes in history.
     """
-    return controller.update(db, order_id, request, current_user)
+    return controller.update(db, order_id, request)
 
 # Endpoint to delete an order by its ID
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)

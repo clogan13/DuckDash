@@ -2,14 +2,10 @@
 Main FastAPI application with authentication and protected routes.
 """
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.index import load_routes
-from .controllers import auth
-from .dependencies.auth import get_current_user
 from .models import model_loader
-from .dependencies.config import conf
-
 
 app = FastAPI()
 

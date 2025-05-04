@@ -1,6 +1,6 @@
 # This file loads all API routers into the FastAPI app.
 # Add new routers here to make their endpoints available in the API docs.
-from . import orders, order_details, customers, menu, inventory, ingredient, promotions
+from . import orders, order_details, customers, menu, inventory, ingredient, promotions, auth
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -17,4 +17,5 @@ def load_routes(app):
     app.include_router(inventory.router)
     app.include_router(ingredient.router)
     app.include_router(promotions.router)
+    app.include_router(auth.router)
     app.include_router(router)
