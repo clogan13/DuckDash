@@ -15,7 +15,8 @@ def create(request: schema.OrderDetailCreate, db: Session = Depends(get_db)):
     return controller.create(db=db, request=request)
 
 
-@router.get("/", response_model=list[schema.OrderDetail])
+
+@router.get("/", response_model=List[schema.OrderDetail])
 def read_all(db: Session = Depends(get_db)):
     return controller.read_all(db)
 

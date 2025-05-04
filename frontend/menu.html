@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>DuckDash Menu</title>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="logo-container">
+        <img src="./img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+        <h1 class="brand">DuckDash</h1>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="login.html" class="login-btn">Login</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Menu Section -->
+    <section class="centered-section">
+      <div class="menu-container">
+        <h1 class="menu-title">DuckDash Menu</h1>
+        <div id="menu-grid" class="menu-grid"></div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+      </ul>
+    </footer>
+
+    <!-- JS to Fetch Menu from API -->
+    <script>
+      async function loadMenu() {
+        try {
+          const res = await fetch("http://localhost:8000/menu/");
+          const menuItems = await res.json();
+
+          const grid = document.getElementById("menu-grid");
+          const grouped = {};
+
+          menuItems.forEach((item) => {
+            const cat = item.category || "Other";
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(item);
+          });
+
+          for (const category in grouped) {
+            const section = document.createElement("div");
+            section.className = "menu-section";
+            section.innerHTML = `<h2>${category}</h2><ul></ul>`;
+
+            grouped[category].forEach((item) => {
+              const li = document.createElement("li");
+              li.innerHTML = `${item.name} <span>$${item.price.toFixed(2)}</span>`;
+              section.querySelector("ul").appendChild(li);
+            });
+
+            grid.appendChild(section);
+          }
+        } catch (err) {
+          console.error("Failed to load menu:", err);
+        }
+      }
+
+      loadMenu();
+    </script>
+  </body>
+</html>
