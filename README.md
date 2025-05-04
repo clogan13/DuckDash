@@ -51,7 +51,10 @@ DuckDash/
 │   ├── dependencies/   # DB config, auth, etc.
 │   ├── models/         # SQLAlchemy models
 │   ├── routers/        # API endpoints
-│   └── schemas/        # Pydantic schemas
+│   ├── schemas/        # Pydantic schemas
+│   └── scripts/        # Utility scripts (e.g., data seeding)
+├── docs/               # Feature documentation
+│   └── features/       # Detailed feature docs
 ├── tests/              # Test cases
 ├── requirements.txt    # Python dependencies
 ├── schema.sql          # MySQL schema (share with your group!)
@@ -61,16 +64,34 @@ DuckDash/
 ---
 
 ## 🛠️ Features
-- User registration & login (JWT auth)
-- Customer, menu, order, inventory, and feedback management
-- MySQL database support
-- Well-documented code and API
+- **User Authentication**
+  - Registration & login with JWT
+  - Protected endpoints for staff operations
+- **Menu Management**
+  - Public menu browsing with filters (category, dietary, price)
+  - Protected endpoints for menu modifications
+  - Sample menu data seeding
+- **Order Processing**
+  - Customer order creation
+  - Order tracking and management
+- **Additional Features**
+  - Inventory management
+  - Customer feedback
+  - Analytics and reporting
+
+---
+
+## 📖 Documentation
+Detailed documentation for each feature is available in the `docs/features/` directory:
+- [Menu Browsing](docs/features/menu_browsing.md) - Complete guide to menu endpoints and filtering
+- More feature documentation coming soon!
 
 ---
 
 ## 👥 For Group Members
 - Use `requirements.txt` to install dependencies
 - Use `schema.sql` to set up your database
+- Check the documentation in `docs/features/` for implementation details
 - All code is commented and ready for collaboration
 
 ---
