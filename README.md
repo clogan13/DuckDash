@@ -104,3 +104,11 @@ Detailed documentation for each feature is available in the `docs/features/` dir
 ---
 
 Happy coding! 🦆
+
+## Documentation
+
+- [API Documentation](docs/api.md)
+- [Database Schema](docs/database.md)
+- [Authentication System](docs/authentication.md)
+- [Order System](docs/orders.md)
+- [Promotion System](docs/promotion_system.md)
