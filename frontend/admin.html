@@ -4,45 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Duck Dash Restaurant</title>
+    <title>DuckDash - Admin Dashboard</title>
   </head>
   <body>
-    <nav id="nav">
-      <ul id="nav-ul">
-        <img
-          src="./img/DuckDashLogo.jpg"
-          alt="DuckDash Logo"
-          class="nav-logo"
-        />
-        <li style="color: var(--white);">DuckDash</a></li>
-      </ul>
-      <ul id="nav-ul">
-        <li><a href="index.html">Logout</a></li>
-      </ul>
-    </nav>
+    <!-- Modern Header -->
+    <header>
+      <div class="logo-container">
+        <img src="./img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+        <h1 class="brand">DuckDash</h1>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="login-btn">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
 
+    <!-- Admin Dashboard Section -->
     <section class="admin-section">
-        <div class="admin-container">
-            <h1 class="admin-title">Admin Dashboard</h1>
-            <div class="dashboard-container">
-              <div class="dashboard-card">
-                <div class="card-title">Today's Orders</div>
-                <div class="card-value">15</div>
-              </div>
-              <div class="dashboard-card">
-                <div class="card-title">Pending Orders</div>
-                <div class="card-value">7</div>
-              </div>
-              <div class="dashboard-card">
-                <div class="card-title">Total Revenue</div>
-                <div class="card-value">$1,250</div>
-              </div>
-            </div>
+      <div class="admin-container">
+        <h1 class="admin-title">Admin Dashboard</h1>
+        <div class="dashboard-container">
+          <div class="dashboard-card">
+            <div class="card-title">Today's Orders</div>
+            <div class="card-value">15</div>
           </div>
+          <div class="dashboard-card">
+            <div class="card-title">Pending Orders</div>
+            <div class="card-value">7</div>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-title">Total Revenue</div>
+            <div class="card-value">$1,250</div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <footer class="footer">
-      <p style="color: white">DuskDash Restaurant© 2025</p>
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
     </footer>
   </body>
 </html>

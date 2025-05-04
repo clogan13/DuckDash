@@ -4,27 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Duck Dash Restaurant</title>
+    <title>DuckDash - Order History</title>
   </head>
   <body>
-    <nav id="nav">
-      <ul id="nav-ul">
-        <img
-          src="./img/DuckDashLogo.jpg"
-          alt="DuckDash Logo"
-          class="nav-logo"
-        />
-        <li><a href="index.html">Home</a></li>
-        <li><a href="cust_menu.html">Menu</a></li>
-        <li><a href="order.html">Orders</a></li>
-        <li><a href="cust_contact.html">Contact Us</a></li>
-      </ul>
-      <ul id="nav-ul">
-        <li><a href="index.html">Logout</a></li>
-      </ul>
-    </nav>
+    <!-- Modern Header -->
+    <header>
+      <div class="logo-container">
+        <img src="./img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+        <h1 class="brand">DuckDash</h1>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="cust_menu.html">Menu</a></li>
+          <li><a href="order.html">Orders</a></li>
+          <li><a href="cust_contact.html">Contact Us</a></li>
+          <li><a href="index.html" class="login-btn">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
 
-    <section class="centered-section">
+    <!-- Order History Table -->
+    <section class="order-history">
+      <div class="history-header">
+        <h2>Your Recent Orders</h2>
+      </div>
+
       <div class="history-table">
         <table>
           <thead>
@@ -63,9 +68,10 @@
       </div>
     </section>
 
-    <footer class="footer">
-      <p style="color: white">DuskDash Restaurant© 2025</p>
-      <ul id="footer-ul">
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+      <ul class="footer-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="cust_menu.html">Menu</a></li>
         <li><a href="order.html">Orders</a></li>

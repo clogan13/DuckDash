@@ -4,27 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Duck Dash Restaurant</title>
+    <title>DuckDash Login</title>
   </head>
   <body>
-    <nav id="nav">
-      <ul id="nav-ul">
-        <img
-          src="./img/DuckDashLogo.jpg"
-          alt="DuckDash Logo"
-          class="nav-logo"
-        />
-        <li><a href="index.html">Home</a></li>
-        <li><a href="menu.html">Menu</a></li>
-        <li><a href="contact.html">Contact Us</a></li>
-      </ul>
-      <ul id="nav-ul">
-        <li><a href="login.html">Login</a></li>
-      </ul>
-    </nav>
+    <!-- Modern Header -->
+    <header>
+      <div class="logo-container">
+        <img src="./img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+        <h1 class="brand">DuckDash</h1>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="login.html" class="login-btn">Login</a></li>
+        </ul>
+      </nav>
+    </header>
 
+    <!-- Login Form Section -->
     <section class="centered-section">
-      <form action="" method="">
+      <form action="#" method="post">
         <div class="form-container">
           <h1 class="form-header">Login</h1>
 
@@ -32,31 +33,26 @@
             <label for="email" class="on-top">E-MAIL</label>
             <input type="email" name="email" id="email" required />
           </div>
+
           <div>
             <label for="password" class="on-top">PASSWORD</label>
             <input type="password" name="password" id="password" required />
           </div>
 
-          <div>
-            <button type="submit">Login</button>
-            <p class="btm-txt">
-              Don't have an account?
-              <strong
-                ><em
-                  ><a style="color: var(--primary-blue)" href="signup.html"
-                    >Sign up</a
-                  ></em
-                ></strong
-              >
-            </p>
-          </div>
+          <button type="submit">Login</button>
+
+          <p class="btm-txt">
+            Don't have an account?
+            <strong><em><a href="signup.html" style="color: var(--primary-blue)">Sign up</a></em></strong>
+          </p>
         </div>
       </form>
     </section>
 
-    <footer class="footer">
-      <p style="color: white">DuskDash Restaurant© 2025</p>
-      <ul id="footer-ul">
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+      <ul class="footer-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="menu.html">Menu</a></li>
         <li><a href="contact.html">Contact Us</a></li>
