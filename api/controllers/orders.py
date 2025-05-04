@@ -1,13 +1,21 @@
+"""
+Controller for order operations.
+Handles creation, retrieval, update, and deletion of orders and their items.
+"""
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Response, Depends
 from ..models import Orders as model
 from ..models.Menu import Menu
 from ..schemas.orders import OrderCreate, OrderUpdate
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
 
-# Controller function to create a new order in the database, including order details
+# Controller function to create a new order in the database, including order items
 def create(db: Session, request: OrderCreate):
-    # Calculate total amount and create order items
+    """
+    Create a new order and its associated order items.
+    Calculates the total amount and validates menu items.
+    """
     total_amount = 0
     order_items = []
     for detail in request.order_details:
@@ -23,7 +31,10 @@ def create(db: Session, request: OrderCreate):
         ))
     new_order = model.Order(
         customer_id=request.customer_id,
-        description=request.description,
+        tracking_number=request.tracking_number,
+        status=request.status,
+        order_time=datetime.utcnow(),
+        wait_time_minutes=request.wait_time_minutes,
         total_amount=total_amount,
         items=order_items
     )
@@ -38,6 +49,9 @@ def create(db: Session, request: OrderCreate):
 
 # Controller function to get all orders from the database
 def read_all(db: Session):
+    """
+    Retrieve all orders from the database.
+    """
     try:
         result = db.query(model.Order).all()
     except SQLAlchemyError as e:
@@ -47,6 +61,9 @@ def read_all(db: Session):
 
 # Controller function to get a single order by ID
 def read_one(db: Session, order_id: int):
+    """
+    Retrieve a single order by its ID.
+    """
     try:
         item = db.query(model.Order).filter(model.Order.id == order_id).first()
         if not item:
@@ -58,6 +75,9 @@ def read_one(db: Session, order_id: int):
 
 # Controller function to update an order by ID
 def update(db: Session, order_id: int, request: OrderUpdate):
+    """
+    Update an existing order by its ID.
+    """
     try:
         item = db.query(model.Order).filter(model.Order.id == order_id)
         if not item.first():
@@ -72,6 +92,9 @@ def update(db: Session, order_id: int, request: OrderUpdate):
 
 # Controller function to delete an order by ID
 def delete(db: Session, order_id: int):
+    """
+    Delete an order by its ID.
+    """
     try:
         item = db.query(model.Order).filter(model.Order.id == order_id)
         if not item.first():

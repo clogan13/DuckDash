@@ -1,3 +1,7 @@
+"""
+Controller for order detail (order item) operations.
+Handles creation, retrieval, update, and deletion of order items.
+"""
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Response, Depends
 from ..models import OrderItem
@@ -5,10 +9,14 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 def create(db: Session, request):
+    """
+    Create a new order item (order detail) in the database.
+    """
     new_item = OrderItem(
         order_id=request.order_id,
-        menu_id=request.menu_id,
-        amount=request.amount
+        menu_item_id=request.menu_item_id,
+        quantity=request.quantity,
+        item_price=request.item_price
     )
 
     try:
@@ -23,6 +31,9 @@ def create(db: Session, request):
 
 
 def read_all(db: Session):
+    """
+    Retrieve all order items from the database.
+    """
     try:
         result = db.query(OrderItem).all()
     except SQLAlchemyError as e:
@@ -32,6 +43,9 @@ def read_all(db: Session):
 
 
 def read_one(db: Session, item_id):
+    """
+    Retrieve a single order item by its ID.
+    """
     try:
         item = db.query(OrderItem).filter(OrderItem.id == item_id).first()
         if not item:
@@ -43,6 +57,9 @@ def read_one(db: Session, item_id):
 
 
 def update(db: Session, item_id, request):
+    """
+    Update an existing order item by its ID.
+    """
     try:
         item = db.query(OrderItem).filter(OrderItem.id == item_id)
         if not item.first():
@@ -57,6 +74,9 @@ def update(db: Session, item_id, request):
 
 
 def delete(db: Session, item_id):
+    """
+    Delete an order item by its ID.
+    """
     try:
         item = db.query(OrderItem).filter(OrderItem.id == item_id)
         if not item.first():

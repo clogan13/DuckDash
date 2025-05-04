@@ -2,22 +2,24 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
+# Base schema for inventory data
+class InventoryBase(BaseModel):
+    ingredient_id: int
+    quantity: float
+    unit_cost: Optional[float] = None
 
-class InventoryItem(BaseModel):
-    resource_name: str
-    quantity: int
-    price: float
-
-class InventoryCreate(BaseModel):
+# Schema for creating a new inventory item
+class InventoryCreate(InventoryBase):
     pass
 
+# Schema for updating an inventory item
 class InventoryUpdate(BaseModel):
-    resource_name: Optional[str] = None
-    quantity: Optional[int] = None
-    price: Optional[float] = None
+    ingredient_id: Optional[int] = None
+    quantity: Optional[float] = None
+    unit_cost: Optional[float] = None
 
-class Inventory(InventoryItem):
+# Schema for returning an inventory item from the API
+class Inventory(InventoryBase):
     id: int
-
-    class ConfigDict:
-        from_attributes = True
+    class Config:
+        orm_mode = True

@@ -2,8 +2,6 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
-from .Inventory import InventoryItem
-
 # Base schema for menu item data
 class MenuBase(BaseModel):
     name: str
@@ -28,4 +26,4 @@ class MenuUpdate(BaseModel):
 class Menu(MenuBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
