@@ -2,14 +2,16 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
-from .Menu import MenuItem
+# Schema for creating an order detail (line item)
+class OrderDetailCreate(BaseModel):
+    menu_item_id: int  # The menu item being ordered
+    quantity: int      # How many of this item
 
-
+# Base schema for order details
 class OrderDetailBase(BaseModel):
     amount: int
 
-
-class OrderDetailCreate(OrderDetailBase):
+class OrderDetailCreateOld(OrderDetailBase):
     order_id: int
     menu_id: int
 
@@ -18,11 +20,10 @@ class OrderDetailUpdate(BaseModel):
     menu_id: Optional[int] = None
     amount: Optional[int] = None
 
-
 class OrderDetail(OrderDetailBase):
     id: int
     order_id: int
-    menu_id: MenuItem = None
+    menu_id: int = None
 
-    class ConfigDict:
-        from_attributes = True
+    class Config:
+        orm_mode = True

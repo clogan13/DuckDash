@@ -4,23 +4,28 @@ from pydantic import BaseModel
 
 from .Inventory import InventoryItem
 
-class MenuItem(BaseModel):
-    item_name: str
-
-class createMenuItem(BaseModel):
-    item_name: str
+# Base schema for menu item data
+class MenuBase(BaseModel):
+    name: str
+    description: Optional[str] = None
     price: float
-    ingredients: list[str]
-    availability: bool
+    category: Optional[str] = None
+    dietary: Optional[str] = None
 
-class updateMenuItem(BaseModel):
-    item_name: Optional[str] = None
+# Schema for creating a new menu item
+class MenuCreate(MenuBase):
+    pass
+
+# Schema for updating a menu item
+class MenuUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
     price: Optional[float] = None
-    ingredients: Optional[list[str]] = None
-    availability: Optional[bool] = None
+    category: Optional[str] = None
+    dietary: Optional[str] = None
 
-class Menu(MenuItem):
+# Schema for returning a menu item from the API
+class Menu(MenuBase):
     id: int
-
     class Config:
-        form_attributes = True
+        orm_mode = True
