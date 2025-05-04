@@ -14,8 +14,26 @@ from datetime import datetime
 def create(db: Session, request: OrderCreate):
     """
     Create a new order and its associated order items.
+    If customer_id is not provided, create a guest customer record.
     Calculates the total amount and validates menu items.
     """
+    # If no customer_id, create a guest customer
+    if not request.customer_id:
+        from ..models.Customer import Customer
+        guest = Customer(
+            first_name=request.first_name or "Guest",
+            last_name=request.last_name or "",
+            phone=request.phone,
+            email=request.email,
+            address=request.address
+        )
+        db.add(guest)
+        db.commit()
+        db.refresh(guest)
+        customer_id = guest.id
+    else:
+        customer_id = request.customer_id
+
     total_amount = 0
     order_items = []
     for detail in request.order_details:
@@ -30,7 +48,7 @@ def create(db: Session, request: OrderCreate):
             item_price=menu_item.price
         ))
     new_order = model.Order(
-        customer_id=request.customer_id,
+        customer_id=customer_id,
         tracking_number=request.tracking_number,
         status=request.status,
         order_time=datetime.utcnow(),

@@ -10,7 +10,12 @@ class OrderBase(BaseModel):
 
 # Schema for creating a new order, including order details
 class OrderCreate(OrderBase):
-    customer_id: int  # The ID of the customer placing the order
+    customer_id: Optional[int] = None  # The ID of the customer placing the order (optional for guests)
+    first_name: Optional[str] = None  # Guest first name
+    last_name: Optional[str] = None   # Guest last name
+    phone: Optional[str] = None       # Guest phone
+    email: Optional[str] = None       # Guest email
+    address: Optional[str] = None     # Guest address
     tracking_number: str  # Unique tracking number for the order
     status: OrderStatus = OrderStatus.pending  # Order status, defaults to pending
     wait_time_minutes: Optional[int] = None  # Estimated wait time in minutes

@@ -24,7 +24,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(orders.router, dependencies=[Depends(get_current_user)])
+app.include_router(orders.router)
 app.include_router(order_details.router, dependencies=[Depends(get_current_user)])
 app.include_router(customers.router, dependencies=[Depends(get_current_user)])
 app.include_router(menu.router, dependencies=[Depends(get_current_user)])
