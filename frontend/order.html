@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <title>DuckDash - Place Order</title>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="/static/img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+      <h1 class="brand">DuckDash</h1>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/static/index.html">Home</a></li>
+        <li><a href="/static/menu.html">Menu</a></li>
+        <li><a href="/static/order.html">Order</a></li>
+        <li><a href="/static/login.html" class="login-btn">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+  <section class="centered-section">
+    <div class="order-form-container">
+      <h1>Place Your Order</h1>
+      <form id="order-form">
+        <div id="guest-fields">
+          <label for="guest-name">Name</label>
+          <input type="text" id="guest-name" name="guest_name" required />
+          <label for="guest-phone">Phone</label>
+          <input type="tel" id="guest-phone" name="guest_phone" required />
+        </div>
+        <div id="menu-items"></div>
+        <button type="submit">Submit Order</button>
+      </form>
+      <div id="order-confirmation" style="display:none;"></div>
+    </div>
+  </section>
+  <footer>
+    <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="/static/index.html">Home</a></li>
+      <li><a href="/static/menu.html">Menu</a></li>
+      <li><a href="/static/contact.html">Contact Us</a></li>
+    </ul>
+  </footer>
+  <script>
+    // Check if user is logged in
+    const token = localStorage.getItem("duckdash_token");
+    if (token) {
+      document.getElementById("guest-fields").style.display = "none";
+    }
+
+    // Load menu items
+    async function loadMenu() {
+      const res = await fetch("http://127.0.0.1:8000/menu/");
+      const menuItems = await res.json();
+      const menuDiv = document.getElementById("menu-items");
+      menuDiv.innerHTML = '<h2>Select Items</h2>';
+      menuItems.forEach(item => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <label>
+            <input type="checkbox" name="menu_item" value="${item.id}" data-name="${item.name}" data-price="${item.price}" />
+            ${item.name} ($${item.price.toFixed(2)})
+          </label>
+          <input type="number" min="1" value="1" style="width:50px; margin-left:10px;" disabled />
+        `;
+        const checkbox = div.querySelector('input[type="checkbox"]');
+        const qtyInput = div.querySelector('input[type="number"]');
+        checkbox.addEventListener('change', function() {
+          qtyInput.disabled = !this.checked;
+        });
+        menuDiv.appendChild(div);
+      });
+    }
+    loadMenu();
+
+    // Handle order submission
+    document.getElementById("order-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const selected = Array.from(document.querySelectorAll('input[name="menu_item"]:checked'));
+      if (selected.length === 0) {
+        alert("Please select at least one menu item.");
+        return;
+      }
+      const items = selected.map(cb => ({
+        menu_item_id: parseInt(cb.value),
+        quantity: parseInt(cb.parentElement.nextElementSibling.value)
+      }));
+      let orderData = { items };
+      if (!token) {
+        orderData.guest_name = document.getElementById("guest-name").value;
+        orderData.guest_phone = document.getElementById("guest-phone").value;
+      }
+      // If logged in, attach token
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      try {
+        const response = await fetch("http://127.0.0.1:8000/orders/", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(orderData)
+        });
+        if (response.ok) {
+          const result = await response.json();
+          document.getElementById("order-form").style.display = "none";
+          document.getElementById("order-confirmation").style.display = "block";
+          document.getElementById("order-confirmation").innerHTML = `<h2>Order Placed!</h2><p>Your order ID: <b>${result.id || result.order_id}</b></p>`;
+        } else {
+          const err = await response.json();
+          alert("Order failed: " + (err.detail || "Unknown error"));
+        }
+      } catch (error) {
+        alert("Error connecting to server.");
+      }
+    });
+  </script>
+</body>
+</html> 

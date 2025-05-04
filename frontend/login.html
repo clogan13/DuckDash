@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <title>DuckDash - Login</title>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="/static/img/DuckDashLogo.jpg" alt="DuckDash Logo" class="logo" />
+      <h1 class="brand">DuckDash</h1>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/static/index.html">Home</a></li>
+        <li><a href="/static/menu.html">Menu</a></li>
+        <li><a href="/static/contact.html">Contact Us</a></li>
+        <li><a href="/static/signup.html" class="login-btn">Sign Up</a></li>
+      </ul>
+    </nav>
+  </header>
+  <section class="centered-section">
+    <form id="login-form">
+      <div class="form-container">
+        <div class="form-header">Login to DuckDash</div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+        <button type="submit">Login</button>
+        <div class="btm-txt">
+          Don't have an account? <a href="/static/signup.html" style="color: var(--primary-blue)">Sign up here</a>.
+        </div>
+      </div>
+    </form>
+  </section>
+  <footer>
+    <p>&copy; 2025 DuckDash Restaurant. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="/static/index.html">Home</a></li>
+      <li><a href="/static/menu.html">Menu</a></li>
+      <li><a href="/static/contact.html">Contact Us</a></li>
+    </ul>
+  </footer>
+  <script>
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new URLSearchParams();
+      data.append("username", document.getElementById("email").value);
+      data.append("password", document.getElementById("password").value);
+      try {
+        const response = await fetch("http://127.0.0.1:8000/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: data,
+        });
+        if (response.ok) {
+          const result = await response.json();
+          localStorage.setItem("duckdash_token", result.access_token);
+          alert("Login successful!");
+          window.location.href = "/static/index.html";
+        } else {
+          const err = await response.json();
+          alert("Login failed: " + (err.detail || "Unknown error"));
+        }
+      } catch (error) {
+        alert("Error connecting to server.");
+      }
+    });
+  </script>
+</body>
+</html> 
