@@ -94,6 +94,20 @@ CREATE TABLE IF NOT EXISTS `orders` (
     ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Order status history
+CREATE TABLE IF NOT EXISTS `order_status_history` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `order_id` INT NOT NULL,
+  `status` ENUM('pending','confirmed','preparing','ready','completed','cancelled') NOT NULL,
+  `changed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `changed_by` INT,  -- Staff user ID who made the change
+  `notes` TEXT,      -- Optional notes about the status change
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`)
+    ON DELETE CASCADE,
+  FOREIGN KEY (`changed_by`) REFERENCES `users`(`id`)
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
 -- Order items
 CREATE TABLE IF NOT EXISTS `order_item` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

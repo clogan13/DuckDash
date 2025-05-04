@@ -9,6 +9,7 @@ from ..models.Menu import Menu
 from ..schemas.orders import OrderCreate, OrderUpdate
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
+from ..dependencies.auth import get_current_user
 
 # Controller function to create a new order in the database, including order items
 def create(db: Session, request: OrderCreate):
@@ -60,6 +61,16 @@ def create(db: Session, request: OrderCreate):
         db.add(new_order)
         db.commit()
         db.refresh(new_order)
+        
+        # Record initial status in history
+        history_entry = model.OrderStatusHistory(
+            order_id=new_order.id,
+            status=request.status,
+            changed_at=datetime.utcnow(),
+            notes="Order created"
+        )
+        db.add(history_entry)
+        db.commit()
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
@@ -92,21 +103,41 @@ def read_one(db: Session, order_id: int):
     return item
 
 # Controller function to update an order by ID
-def update(db: Session, order_id: int, request: OrderUpdate):
+def update(db: Session, order_id: int, request: OrderUpdate, current_user = None):
     """
     Update an existing order by its ID.
+    Records status changes in history.
     """
     try:
         item = db.query(model.Order).filter(model.Order.id == order_id)
         if not item.first():
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found!")
+        
+        # Get current order
+        current_order = item.first()
+        
+        # Check if status is being updated
+        if request.status and request.status != current_order.status:
+            # Record status change in history
+            history_entry = model.OrderStatusHistory(
+                order_id=order_id,
+                status=request.status,
+                changed_at=datetime.utcnow(),
+                changed_by=current_user.id if current_user else None,
+                notes=request.notes
+            )
+            db.add(history_entry)
+        
+        # Update order
         update_data = request.dict(exclude_unset=True)
         item.update(update_data, synchronize_session=False)
         db.commit()
+        
+        # Return updated order
+        return item.first()
     except SQLAlchemyError as e:
         error = str(e.__dict__['orig'])
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
-    return item.first()
 
 # Controller function to delete an order by ID
 def delete(db: Session, order_id: int):

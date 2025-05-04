@@ -26,12 +26,26 @@ class OrderUpdate(BaseModel):
     customer_id: Optional[int] = None
     status: Optional[OrderStatus] = None
     wait_time_minutes: Optional[int] = None
+    notes: Optional[str] = None  # Notes about the status change
+
+# Schema for order status history
+class OrderStatusHistory(BaseModel):
+    id: int
+    order_id: int
+    status: OrderStatus
+    changed_at: datetime
+    changed_by: Optional[int] = None
+    notes: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 # Schema for returning an order from the API, includes related details
 class Order(OrderBase):
     id: int  # Unique order ID
     order_time: Optional[datetime] = None
     items: Optional[List[OrderDetail]] = None
+    status_history: Optional[List[OrderStatusHistory]] = None
     customer_id: int
     tracking_number: str
     status: OrderStatus
@@ -39,4 +53,4 @@ class Order(OrderBase):
     wait_time_minutes: Optional[int] = None
 
     class Config:
-        from_attributes = True  # Enables compatibility with ORM objects
+        from_attributes = True

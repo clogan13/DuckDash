@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class OrderDetailCreate(BaseModel):
     menu_item_id: int  # The menu item being ordered
     quantity: int      # How many of this item
-    item_price: float  # Price of the item
+    # item_price removed; backend will calculate
 
 # Base schema for order details
 class OrderDetailBase(BaseModel):
