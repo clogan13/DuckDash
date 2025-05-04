@@ -5,11 +5,13 @@ Handles creation, retrieval, update, and deletion of orders and their items.
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Response, Depends
 from ..models import Orders as model
-from ..models.Menu import Menu
+from ..models.Menu import Menu, menu_item_ingredient
 from ..schemas.orders import OrderCreate, OrderUpdate
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from ..dependencies.auth import get_current_user
+from ..models.Inventory import Inventory
+from sqlalchemy import select
 
 # Controller function to create a new order in the database, including order items
 def create(db: Session, request: OrderCreate):
@@ -17,6 +19,7 @@ def create(db: Session, request: OrderCreate):
     Create a new order and its associated order items.
     If customer_id is not provided, create a guest customer record.
     Calculates the total amount and validates menu items.
+    Deducts inventory for each ingredient used in the order.
     """
     # If no customer_id, create a guest customer
     if not request.customer_id:
@@ -37,6 +40,7 @@ def create(db: Session, request: OrderCreate):
 
     total_amount = 0
     order_items = []
+    ingredient_deductions = {}  # {ingredient_id: total_to_deduct}
     for detail in request.order_details:
         menu_item = db.query(Menu).filter(Menu.id == detail.menu_item_id).first()
         if not menu_item:
@@ -48,6 +52,28 @@ def create(db: Session, request: OrderCreate):
             quantity=detail.quantity,
             item_price=menu_item.price
         ))
+        # Inventory deduction logic (fixed)
+        ingredient_rows = db.execute(
+            menu_item_ingredient.select().where(
+                menu_item_ingredient.c.menu_item_id == detail.menu_item_id
+            )
+        ).fetchall()
+        for row in ingredient_rows:
+            ingredient_id = row.ingredient_id
+            required_qty = row.quantity
+            total_required = required_qty * detail.quantity
+            ingredient_deductions[ingredient_id] = ingredient_deductions.get(ingredient_id, 0) + total_required
+    # Check and deduct inventory
+    try:
+        for ingredient_id, total_to_deduct in ingredient_deductions.items():
+            inventory = db.query(Inventory).filter(Inventory.ingredient_id == ingredient_id).with_for_update().first()
+            if not inventory or inventory.quantity < total_to_deduct:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Insufficient inventory for ingredient {ingredient_id}")
+            inventory.quantity -= total_to_deduct
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise
     new_order = model.Order(
         customer_id=customer_id,
         tracking_number=request.tracking_number,
