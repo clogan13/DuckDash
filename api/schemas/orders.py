@@ -20,6 +20,7 @@ class OrderCreate(OrderBase):
     status: OrderStatus = OrderStatus.pending  # Order status, defaults to pending
     wait_time_minutes: Optional[int] = None  # Estimated wait time in minutes
     order_details: List[OrderDetailCreate]  # List of items in the order
+    promotion_code: Optional[str] = None  # Promotion code (optional)
 
 # Schema for updating an order
 class OrderUpdate(BaseModel):

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from ..dependencies.database import get_db
-from ..schemas.Ingredient import IngredientCreate, IngredientUpdate, Ingredient
+from ..schemas.ingredients import IngredientCreate, IngredientUpdate, Ingredient
 from ..controllers import Ingredient as controller
 from typing import List
 

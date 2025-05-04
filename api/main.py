@@ -4,7 +4,7 @@ Main FastAPI application with authentication and protected routes.
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import orders, order_details, customers, menu, inventory, ingredients
+from .routers.index import load_routes
 from .controllers import auth
 from .dependencies.auth import get_current_user
 from .models import model_loader
@@ -22,14 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(orders.router)
-app.include_router(order_details.router, dependencies=[Depends(get_current_user)])
-app.include_router(customers.router, dependencies=[Depends(get_current_user)])
-app.include_router(menu.router)
-app.include_router(inventory.router, dependencies=[Depends(get_current_user)])
-app.include_router(ingredients.router, dependencies=[Depends(get_current_user)])
+# Use load_routes to register all routers, including promotions
+load_routes(app)
 
 @app.get("/")
 def root():

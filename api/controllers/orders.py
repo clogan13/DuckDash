@@ -12,6 +12,8 @@ from datetime import datetime
 from ..dependencies.auth import get_current_user
 from ..models.Inventory import Inventory
 from sqlalchemy import select
+from ..models.Promotion import Promotion
+from sqlalchemy import func
 
 # Controller function to create a new order in the database, including order items
 def create(db: Session, request: OrderCreate):
@@ -20,6 +22,7 @@ def create(db: Session, request: OrderCreate):
     If customer_id is not provided, create a guest customer record.
     Calculates the total amount and validates menu items.
     Deducts inventory for each ingredient used in the order.
+    Applies promotion code if provided.
     """
     # If no customer_id, create a guest customer
     if not request.customer_id:
@@ -74,6 +77,30 @@ def create(db: Session, request: OrderCreate):
     except Exception as e:
         db.rollback()
         raise
+    # Promotion code logic
+    if request.promotion_code:
+        promo = db.query(Promotion).filter(
+            func.lower(Promotion.code) == request.promotion_code.lower()
+        ).first()
+        now = datetime.utcnow().date()
+        if not promo:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid promotion code.")
+        if promo.start_date > now or promo.end_date < now:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Promotion code is not active.")
+        if promo.usage_limit is not None and promo.usage_limit <= 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Promotion code usage limit reached.")
+        # Apply discount
+        if promo.discount_percent:
+            discount = float(total_amount) * float(promo.discount_percent) / 100.0
+        elif promo.discount_amount:
+            discount = float(promo.discount_amount)
+        else:
+            discount = 0.0
+        total_amount = max(0, float(total_amount) - discount)
+        # Optionally decrement usage_limit
+        if promo.usage_limit is not None:
+            promo.usage_limit -= 1
+            db.commit()
     new_order = model.Order(
         customer_id=customer_id,
         tracking_number=request.tracking_number,

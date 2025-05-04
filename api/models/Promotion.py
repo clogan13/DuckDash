@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DECIMAL
+from sqlalchemy import Column, Integer, String, Date, DECIMAL, Text
 from sqlalchemy.orm import relationship
 from ..dependencies.database import Base
 
@@ -11,5 +11,6 @@ class Promotion(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     usage_limit = Column(Integer)
+    description = Column(Text)
     menu_items = relationship("Menu", back_populates="promotion")
 

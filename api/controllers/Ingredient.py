@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from ..models import Ingredient
-from ..schemas.Ingredient import IngredientCreate, IngredientUpdate
+from ..schemas.ingredients import IngredientCreate, IngredientUpdate
 from sqlalchemy.exc import SQLAlchemyError
 
 # Controller function to create a new ingredient

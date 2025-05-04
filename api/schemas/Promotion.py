@@ -3,19 +3,20 @@ from typing import Optional
 from pydantic import BaseModel
 
 class PromotionBase(BaseModel):
-    PromotionName: str
-    startdate: Optional[datetime]
-    enddate: Optional[datetime]
-    description: Optional[str]
-    deal_percentage: float
+    code: str
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    description: Optional[str] = None
+    discount_percent: Optional[float] = None
+    discount_amount: Optional[float] = None
 
 class PromotionCreate(PromotionBase):
-    PromotionId: int
+    pass
 
 class PromotionUpdate(PromotionBase):
-    PromotionId: Optional[int] = None
-    PromotionName: Optional[str] = None
-    startdate: Optional[datetime] = None
-    enddate: Optional[datetime] = None
-    description: Optional[str] = None
-    deal_percentage: Optional[float] = None
+    pass
+
+class PromotionResponse(PromotionBase):
+    id: int
+    class Config:
+        from_attributes = True
