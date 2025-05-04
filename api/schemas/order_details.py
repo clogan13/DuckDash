@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
-from DuckDash.api.schemas.Menu import MenuItem
+from api.schemas.Menu import MenuItem
 
 
 class OrderDetailBase(BaseModel):
