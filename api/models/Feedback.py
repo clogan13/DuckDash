@@ -1,14 +1,15 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DECIMAL, DATETIME
+from sqlalchemy import Column, Integer, String, DateTime, Text, CheckConstraint, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..dependencies.database import Base
 
 class Feedback(Base):
-    __tablename__ = 'feedback'
-    id = Column(Integer, primary_key=True)
-    menu_id = Column(Integer, ForeignKey('menu.id'))
-    guest_id = Column(Integer, ForeignKey('customer.id'))
-    order_id = Column(Integer, ForeignKey('order.id'))
-    rating = Column(DECIMAL)
-    comment = Column(String)
+    __tablename__ = "feedback"
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
+    rating = Column(Integer, CheckConstraint('rating BETWEEN 1 AND 5'))
+    message = Column(Text)
+    created_at = Column(DateTime)
+    order = relationship("Order")
+    customer = relationship("Customer")
 

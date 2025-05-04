@@ -6,3 +6,5 @@ pytest
 pytest-mock
 httpx
 cryptography
+mysql-connector-python
+python-dotenv

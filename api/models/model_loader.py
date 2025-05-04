@@ -1,15 +1,9 @@
 from . import Customer, Feedback, Orders, Promotion, Payment, Menu, Inventory
-
-from ..dependencies.database import engine
+from ..dependencies.database import engine, Base
 
 
 def index():
-
-    Customer.Base.metadata.create_all(engine)
-    Feedback.Base.metadata.create_all(engine)
-    Inventory.Base.metadata.create_all(engine)
-    Menu.Base.metadata.create_all(engine)
-    Orders.Base.metadata.create_all(engine)
-    Payment.Base.metadata.create_all(engine)
-    Promotion.Base.metadata.create_all(engine)
+    # Create all tables
+    Base.metadata.create_all(engine)
+    print("Database tables created successfully!")
 

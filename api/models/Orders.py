@@ -1,17 +1,34 @@
-from itertools import combinations
-
-from sqlalchemy import Column, ForeignKey, Integer, String, DECIMAL, DATETIME
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from ..dependencies.database import Base
+import enum
 
+class OrderStatus(enum.Enum):
+    pending = "pending"
+    confirmed = "confirmed"
+    preparing = "preparing"
+    ready = "ready"
+    completed = "completed"
+    cancelled = "cancelled"
 
 class Order(Base):
     __tablename__ = "orders"
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
+    tracking_number = Column(String(100), unique=True, nullable=False)
+    status = Column(Enum(OrderStatus), nullable=False, default=OrderStatus.pending)
+    order_time = Column(DateTime)
+    wait_time_minutes = Column(Integer)
+    total_amount = Column(DECIMAL(10,2), nullable=False)
+    customer = relationship("Customer", back_populates="orders")
+    items = relationship("OrderItem", back_populates="order")
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    guest_id = Column(Integer, ForeignKey("guests.id"))
-    guest_name= Column("customer.first_name" + "customer.last_name")
-    order_date = Column(DATETIME, nullable=False, server_default=str(datetime.now()))
-    total = Column( "payment.payment_amount")
-    status = Column(String, nullable=False, server_default="Preparing")
+class OrderItem(Base):
+    __tablename__ = "order_item"
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    menu_item_id = Column(Integer, ForeignKey("menu_item.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    item_price = Column(DECIMAL(10,2), nullable=False)
+    order = relationship("Order", back_populates="items")
+    menu_item = relationship("Menu")
