@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - DuckDash</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="/static/menu.html">
+                    <img src="images/logo.png" alt="DuckDash Logo">
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/static/menu.html">Menu</a>
+                <a href="/static/order.html">Order</a>
+                <a href="/static/contact.html" class="active">Contact</a>
+                <a href="/static/about.html">About</a>
+            </div>
+            <div class="auth-buttons">
+                <button id="login-btn" class="btn btn-outline">Login</button>
+                <button id="register-btn" class="btn btn-primary">Register</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="contact-container">
+        <section class="contact-info">
+            <h1>Contact Us</h1>
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Location</h3>
+                    <p>9201 University City Blvd, Charlotte, NC 28223</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-phone"></i>
+                    <h3>Phone</h3>
+                    <p>(704) 687-8622</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>info@duckdash.com</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>Hours</h3>
+                    <p>Mon-Fri: 10am - 10pm<br>Sat-Sun: 11am - 9pm</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-form">
+            <h2>Send Us a Message</h2>
+            <form id="feedback-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>DuckDash</h3>
+                <p>Your favorite food delivery service at UNC Charlotte.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/static/menu.html">Menu</a></li>
+                    <li><a href="/static/order.html">Order</a></li>
+                    <li><a href="/static/contact.html">Contact</a></li>
+                    <li><a href="/static/about.html">About</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect With Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 DuckDash. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Get the token from localStorage
+        const token = localStorage.getItem('token');
+
+        // Handle form submission
+        document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/feedback/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Thank you for your feedback! We will get back to you soon.');
+                    document.getElementById('feedback-form').reset();
+                } else {
+                    const error = await response.json();
+                    alert('Error submitting feedback: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error connecting to server. Please try again later.');
+            }
+        });
+
+        // Update auth buttons based on login status
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+
+        if (token) {
+            loginBtn.textContent = 'Logout';
+            registerBtn.style.display = 'none';
+            loginBtn.onclick = () => {
+                localStorage.removeItem('token');
+                window.location.href = '/static/menu.html';
+            };
+        } else {
+            loginBtn.onclick = () => window.location.href = '/static/login.html';
+            registerBtn.onclick = () => window.location.href = '/static/register.html';
+        }
+    </script>
+</body>
+</html> 
