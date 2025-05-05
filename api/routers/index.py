@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 
 # Import all routers
-from api.routers import orders, order_details, customers, menu, inventory, ingredient, promotions, auth, feedback
+from api.routers import orders, order_details, customers, menu, inventory, ingredient, promotions, auth
 
 def load_routes(app: FastAPI):
     """
@@ -16,5 +16,4 @@ def load_routes(app: FastAPI):
     app.include_router(inventory.router, prefix="/inventory", tags=["inventory"])
     app.include_router(ingredient.router, prefix="/ingredient", tags=["ingredient"])
     app.include_router(promotions.router, prefix="/promotions", tags=["promotions"])
-    app.include_router(auth.router, prefix="/auth", tags=["auth"])
-    app.include_router(feedback.router, prefix="/feedback", tags=["feedback"])
+    app.include_router(auth.router)  # auth router already has prefix="/auth"

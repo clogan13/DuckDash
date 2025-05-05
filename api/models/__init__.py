@@ -1,5 +1,4 @@
 from .Customer import Customer
-from .Feedback import Feedback
 from .Inventory import Inventory, Ingredient
 from .Menu import Menu
 from .Orders import Order, OrderItem, OrderStatus
@@ -9,7 +8,6 @@ from .user import User
 
 __all__ = [
     'Customer',
-    'Feedback',
     'Inventory',
     'Ingredient',
     'Menu',

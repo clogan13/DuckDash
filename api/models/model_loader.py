@@ -2,30 +2,37 @@
 # This script imports all SQLAlchemy models and creates all tables in the database.
 # Run this script to ensure your database schema matches your models.
 from sqlalchemy import text
-from . import Customer, Feedback, Order, Promotion, Payment, Menu, Inventory
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from . import Customer, Order, Promotion, Payment, Menu, Inventory
 from .user import User
 from ..dependencies.database import engine, Base
 
+Base = declarative_base()
+
 def index():
-    """
-    Create all database tables.
-    """
+    """Create all tables in the database."""
     try:
-        # Drop tables in correct order to handle foreign key constraints
-        with engine.connect() as conn:
-            # Disable foreign key checks
-            conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
-            
-            # Drop all tables
-            Base.metadata.drop_all(bind=engine)
-            
-            # Re-enable foreign key checks
-            conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
-            
-            # Recreate all tables
-            Base.metadata.create_all(bind=engine)
-            
+        # Create tables
+        Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
+        
+        # Test the connection
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT 1"))
+            print(f"Connection test result: {result.fetchone()}")
+            
     except Exception as e:
         print(f"Error creating database tables: {e}")
+
+def load_models():
+    """Load all models into the Base class."""
+    # This import will trigger the creation of all models
+    pass
+
+__all__ = ['Base', 'load_models']
+
+if __name__ == "__main__":
+    index()
 
