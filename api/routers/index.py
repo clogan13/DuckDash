@@ -12,7 +12,7 @@ def load_routes(app: FastAPI):
     app.include_router(orders.router, prefix="/orders", tags=["orders"])
     app.include_router(order_details.router, prefix="/order-details", tags=["order-details"])
     app.include_router(customers.router, prefix="/customers", tags=["customers"])
-    app.include_router(menu.router, prefix="/menu", tags=["menu"])
+    app.include_router(menu.router)  # No prefix here, router already has prefix
     app.include_router(inventory.router, prefix="/inventory", tags=["inventory"])
     app.include_router(ingredient.router, prefix="/ingredient", tags=["ingredient"])
     app.include_router(promotions.router, prefix="/promotions", tags=["promotions"])

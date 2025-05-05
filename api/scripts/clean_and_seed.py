@@ -1,16 +1,36 @@
-"""
-Script to seed the database with sample menu items.
-Run this script to populate the menu with test data.
-"""
-from sqlalchemy.orm import Session
-from ..dependencies.database import SessionLocal
-from ..models.Menu import Menu
+from api.dependencies.database import SessionLocal
+from api.models.Menu import Menu
 from decimal import Decimal
+from sqlalchemy import func
 
-def seed_menu():
+def clean_and_seed():
     db = SessionLocal()
     try:
-        # Sample menu items
+        print("Cleaning up duplicate menu items...")
+        # Find all duplicates
+        duplicates = db.query(Menu.name, Menu.category, func.count('*').label('count'))\
+            .group_by(Menu.name, Menu.category)\
+            .having(func.count('*') > 1)\
+            .all()
+        
+        for name, category, count in duplicates:
+            print(f"Found {count} duplicates for {name} in {category}")
+            # Keep the first one, delete the rest
+            items = db.query(Menu)\
+                .filter(Menu.name == name, Menu.category == category)\
+                .order_by(Menu.id)\
+                .all()
+            
+            # Keep the first one, delete the rest
+            for item in items[1:]:
+                print(f"Deleting duplicate: {item.name} (ID: {item.id})")
+                db.delete(item)
+        
+        db.commit()
+        print("\nDuplicates cleaned up!")
+        
+        print("\nAdding menu items...")
+        # Fresh menu items
         menu_items = [
             {
                 "name": "Classic Burger",
@@ -70,14 +90,13 @@ def seed_menu():
             }
         ]
 
-        # Add menu items to database if they don't exist
+        # Add menu items if they don't exist
         for item in menu_items:
-            existing_item = db.query(Menu).filter(
-                Menu.name == item["name"],
-                Menu.category == item["category"]
-            ).first()
+            existing = db.query(Menu)\
+                .filter(Menu.name == item["name"], Menu.category == item["category"])\
+                .first()
             
-            if not existing_item:
+            if not existing:
                 menu_item = Menu(**item)
                 db.add(menu_item)
                 print(f"Added: {item['name']}")
@@ -85,12 +104,19 @@ def seed_menu():
                 print(f"Skipped (already exists): {item['name']}")
         
         db.commit()
-        print("Successfully seeded menu items!")
+        print("\nMenu items added successfully!")
+        
+        # Verify final menu items
+        print("\nCurrent menu items:")
+        all_items = db.query(Menu).order_by(Menu.category, Menu.name).all()
+        for item in all_items:
+            print(f"ID: {item.id}, Name: {item.name}, Category: {item.category}, Price: ${item.price}")
+            
     except Exception as e:
-        print(f"Error seeding menu items: {str(e)}")
+        print(f"Error: {str(e)}")
         db.rollback()
     finally:
         db.close()
 
 if __name__ == "__main__":
-    seed_menu() 
+    clean_and_seed() 

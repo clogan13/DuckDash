@@ -80,23 +80,31 @@
 
       async function loadMenu() {
         try {
+          console.log("Fetching menu items...");
           const res = await fetch("http://localhost:8000/menu/");
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
           const menuItems = await res.json();
+          console.log("Received menu items:", menuItems);
 
           const grid = document.getElementById("menu-grid");
           const grouped = {};
 
+          // Group items by category
           menuItems.forEach((item) => {
             const cat = item.category || "Other";
             if (!grouped[cat]) grouped[cat] = [];
             grouped[cat].push(item);
           });
 
+          // Create sections for each category
           for (const category in grouped) {
             const section = document.createElement("div");
             section.className = "menu-section";
             section.innerHTML = `<h2>${category}</h2><ul></ul>`;
 
+            // Add items to the category
             grouped[category].forEach((item) => {
               const li = document.createElement("li");
               li.className = "menu-item";
@@ -132,6 +140,8 @@
 
         } catch (err) {
           console.error("Failed to load menu:", err);
+          const grid = document.getElementById("menu-grid");
+          grid.innerHTML = `<div class="error-message">Error loading menu: ${err.message}</div>`;
         }
       }
 
