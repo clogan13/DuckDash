@@ -268,9 +268,20 @@
           body: JSON.stringify(orderData)
         });
         if (response.ok) {
-          const result = await response.json();
-          // Redirect to checkout page with order_id
-          window.location.href = `/static/checkout.html?order_id=${result.id || result.order_id}`;
+          // Hide the order form
+          document.getElementById("order-form").style.display = "none";
+          // Show thank you message
+          const thankYouDiv = document.createElement("div");
+          thankYouDiv.className = "thank-you-message";
+          thankYouDiv.innerHTML = `
+            <h2>Thank you for your order!</h2>
+            <p>Your order has been received and will be prepared shortly.</p>
+            <button onclick="window.location.href='/static/menu.html'">Return to Menu</button>
+          `;
+          document.getElementById("order-form").parentNode.appendChild(thankYouDiv);
+          // Clear the cart
+          cart = [];
+          localStorage.setItem("cart", JSON.stringify(cart));
         } else {
           const err = await response.json();
           alert("Order failed: " + (err.detail || "Unknown error"));

@@ -8,8 +8,9 @@ setup(
         "fastapi",
         "uvicorn",
         "sqlalchemy",
-        "psycopg2-binary",
-        "pytest",
-        "pytest-asyncio",
+        "python-jose[cryptography]",
+        "passlib[bcrypt]",
+        "python-multipart",
+        "mysql-connector-python"
     ],
 ) 

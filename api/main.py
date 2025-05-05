@@ -4,14 +4,14 @@ Main FastAPI application with authentication and protected routes.
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers.index import load_routes
-from .models import model_loader
+from api.routers.index import load_routes
+from api.models import model_loader
 from fastapi.staticfiles import StaticFiles
 import os
 
 app = FastAPI()
 
-# CORS middleware configuration
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,12 +20,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve the 'frontend' directory at '/static'
-frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
-app.mount("/static", StaticFiles(directory=frontend_path), name="static")
-
-# Use load_routes to register all routers, including promotions
+# Load all routes
 load_routes(app)
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/")
 def root():

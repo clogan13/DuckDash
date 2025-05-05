@@ -116,7 +116,6 @@ def create(db: Session, request: OrderCreate):
         db.add(new_order)
         db.commit()
         db.refresh(new_order)
-        
         # Record initial status in history
         history_entry = model.OrderStatusHistory(
             order_id=new_order.id,
@@ -126,12 +125,14 @@ def create(db: Session, request: OrderCreate):
         )
         db.add(history_entry)
         db.commit()
+        # Ensure the order is fully loaded with all fields
+        full_order = db.query(model.Order).filter_by(id=new_order.id).first()
+        print('DEBUG: Returning full_order:', full_order.__dict__)
+        return full_order
     except SQLAlchemyError as e:
         db.rollback()
         error = str(e.__dict__['orig'])
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
-
-    return new_order
 
 # Controller function to get all orders from the database
 def read_all(db: Session):
